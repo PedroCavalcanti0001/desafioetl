@@ -2,6 +2,7 @@ package me.pedroeugenio.ktorsample.utils
 
 import me.pedroeugenio.ktorsample.extensions.execAndMap
 import me.pedroeugenio.ktorsample.extensions.isKeyword
+import me.pedroeugenio.ktorsample.extensions.replaceUnderlines
 import java.io.File
 import java.nio.file.Paths
 import java.util.*
@@ -29,12 +30,12 @@ class MysqlTableToExposedObject {
             val primaryTableName =
                 "${table.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}DAO"
             var primaryKey = ""
+            val fileName = primaryTableName.replaceUnderlines()
             val firstPrimaryTableRow =
-                """object $primaryTableName : Table("$table"){"""
+                """object $fileName : Table("${database}.$table"){"""
             val lastRow = "}"
 
-
-            val cloneFirstRow = "   fun cloneWithEmptyValues(): $primaryTableName { "
+            val cloneFirstRow = "   fun cloneWithEmptyValues(): $fileName { "
             val cloneSecondRow = "       return this.apply {"
 
             val cloneRows = arrayListOf<String>()
@@ -62,6 +63,7 @@ class MysqlTableToExposedObject {
                     autoIncrement = ".autoIncrement()"
                 }
                 val kttype = type!!
+                    .replace("char", "varchar")
                     .replace("bigint", "long")
                     .replace("int", "integer")
                     .replace("smallinteger", "integer")
@@ -107,7 +109,8 @@ class MysqlTableToExposedObject {
             val mainPath = "${Paths.get("").absolutePathString()}${File.separator}src${File.separator}main" +
                     "${File.separator}kotlin"
             val path = findDir(File(mainPath), "dao")
-            val file = File(path, "$primaryTableName.kt")
+
+            val file = File(path, "$fileName.kt")
             val pack = path?.split("/kotlin/")?.last()?.replace("/", ".")
             if (!file.exists()) {
                 file.createNewFile()
