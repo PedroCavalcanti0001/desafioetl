@@ -41,7 +41,13 @@ class MysqlTableToExposedObject {
             val cloneRows = arrayListOf<String>()
 
             val variables = """
-        SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, EXTRA, COLUMN_DEFAULT, CHARACTER_MAXIMUM_LENGTH
+        SELECT COLUMN_NAME
+        ,DATA_TYPE
+        ,COLUMN_KEY
+        ,EXTRA
+        ,COLUMN_DEFAULT
+        ,CHARACTER_MAXIMUM_LENGTH
+        ,IS_NULLABLE
         FROM INFORMATION_SCHEMA.COLUMNS
         WHERE TABLE_SCHEMA = '$database' AND TABLE_NAME = '$table';
     """.trimIndent().execAndMap { resultSet ->
@@ -56,14 +62,18 @@ class MysqlTableToExposedObject {
                 val extra = resultSet.getString("EXTRA")
                 val default = resultSet.getString("COLUMN_DEFAULT")
                 val maxLength = resultSet.getString("CHARACTER_MAXIMUM_LENGTH")
+                val isNullable = resultSet.getBoolean("IS_NULLABLE")
                 var autoIncrement = ""
                 var uniqueIndex = ""
-
+                var nullable = ""
                 if (extra == "auto_increment") {
                     autoIncrement = ".autoIncrement()"
                 }
+                if(isNullable){
+                    nullable = ".nullable()"
+                }
                 val kttype = type!!
-                    .replace("char", "varchar")
+                    .replace(" char", " varchar")
                     .replace("bigint", "long")
                     .replace("int", "integer")
                     .replace("smallinteger", "integer")
@@ -79,8 +89,11 @@ class MysqlTableToExposedObject {
                 val tp =
                     if (kttype != "varchar") """$kttype("$name")""" else """$kttype("$name", length = $maxLength)"""
 
+
+                println("tp $tp")
+
                 val valstr =
-                    """val ${name.replace("_", "")} = ${tp}$autoIncrement$uniqueIndex""".trimIndent()
+                    """val ${name.replace("_", "")} = ${tp}$autoIncrement$uniqueIndex$nullable""".trimIndent()
 
                 val cloneRow = """
                     ${
