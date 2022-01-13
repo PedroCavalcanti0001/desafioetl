@@ -1,17 +1,17 @@
-package me.pedroeugenio.ktorsample
+package me.pedroeugenio.desafioetl
 
-import io.ktor.routing.*
-import io.ktor.http.*
+import io.ktor.application.*
 import io.ktor.auth.*
-import io.ktor.util.*
 import io.ktor.auth.jwt.*
 import io.ktor.features.*
-import io.ktor.application.*
-import io.ktor.response.*
+import io.ktor.http.*
 import io.ktor.request.*
-import kotlin.test.*
+import io.ktor.response.*
+import io.ktor.routing.*
 import io.ktor.server.testing.*
+import io.ktor.util.*
 import pedroeugenio.me.plugins.*
+import kotlin.test.*
 
 class ApplicationTest {
     @Test
