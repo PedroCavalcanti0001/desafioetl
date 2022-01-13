@@ -11,7 +11,7 @@ fun Route.numbersRoute(numbersService: NumbersService) {
     route("/api") {
         get("/numeerosordenados") {
             call.respond(
-                HttpStatusCode.NotAcceptable,
+                HttpStatusCode.Accepted,
                 Gson().toJson(numbersService.sortedNumbers())
             )
         }
